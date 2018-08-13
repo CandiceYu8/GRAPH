@@ -7,7 +7,7 @@
 #include <random>
 #define MAXN 10000
 #define MAXRESULT 10000
-#define GROUPNUM 6
+#define GROUPNUM 12
 
 using namespace std;
 

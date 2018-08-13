@@ -27,7 +27,9 @@ class ShortestPath: public GraphAlgorithm
             vertices.push_back(tmp);
             srand((unsigned)time(NULL));
             for(i=1; i<nodeNum; i++){
-                tmp.groupNum_ = rand()%GROUPNUM+1;
+                // tmp.groupNum_ = rand()%GROUPNUM+1;       // random divide
+                // tmp.groupNum_ = i/(nodeNum/GROUPNUM) + 1;   // range divide
+                tmp.groupNum_ = i%GROUPNUM + 1;         // hash divide
                 tmp.result = MAXRESULT;
                 tmp.parent = -1;
                 tmp.next = NULL;
@@ -112,6 +114,16 @@ class ShortestPath: public GraphAlgorithm
                     << vertices[i].result << endl;
             }
         }
+
+        void Clear(){
+            int i;
+            for(i=1; i<vertices.size(); i++){
+                vertices[i].result = MAXRESULT;
+                vertices[i].parent = -1;
+            }
+            iter = 0;
+            memset(update, -1, sizeof(update));
+        }
 };
 
 int main(int argc, char const *argv[])
@@ -120,9 +132,23 @@ int main(int argc, char const *argv[])
     test1.Init("input2.txt");
     // test1.Display();
     // test1.Algorithm();
-    test1.Algorithm_M(3, 17);
-    test1.ShowResult();
-    cout << "iter times: " << test1.iter << endl;
+    int i;      // loss iteration
+    int j;      // group number
+    for(i=1; i<=17; i++){
+        for(j=1; j<=GROUPNUM; j++){
+            
+            test1.Algorithm_M(j, i);
+            cout << "loss iteration: " << i 
+            << " group number: " << j 
+            << " iter times: " << test1.iter << endl;
+            test1.Clear();
+            // test1.ShowResult();
+        }
+    }
+    
+    // test1.Algorithm_M(2, 17);
+    // test1.ShowResult();
+    
 
     return 0;
 }
