@@ -4,22 +4,21 @@
 #include <vector>
 #include <fstream>
 #include <string.h>
-#include <random>
 #define MAXN 10000
-#define MAXRESULT 10000
-#define GROUPNUM 12
+#define MAXRESULT 100000
+#define GROUPNUM 6
 
 using namespace std;
 
 /* vertex structure */
 struct Vertex{
-    int groupNum_;    
-    int result;
-    int parent;
+    int groupNum_;
+    long result;
+    long parent;
     struct EdgeVertex *next;
 
     Vertex(){}
-    Vertex(int groupNum, int result_):
+    Vertex(int groupNum, long result_):
         groupNum_(groupNum), result(result_){
         parent = -1;
         next = NULL;
@@ -45,10 +44,10 @@ class GraphAlgorithm
     public:
         // data
         vector<struct Vertex> vertices;
-        // int process[MAXN][2];       // record algorithm process
-        int update[MAXN][2];        // distance + parentNum
+        long update[MAXN][3];        // distance + parentNum + flag of whether be changed.
         int iter;
-        // int processNum;         
+        int processNum;
+        int current_max_result;
 
         // static funcfions
         void Display(){
@@ -68,15 +67,16 @@ class GraphAlgorithm
         void Algorithm(){
             int i;
             bool flag = false;      // judge finish condition
-            // if the status doesn't change anymore, then it is finished.       
+            // if the status doesn't change anymore, then it is finished.
             do{
                 iter ++;
-                // cout << "iter: " << iter << endl;
+                cout << "iter: " << iter << endl;
                 flag = false;
-                memset(update, -1, sizeof(update));
+                memset(update, 0, sizeof(update));
                 for(i=0; i<vertices.size(); i++){
                     Relax(i);
                 }
+                //Checkthestatus(vertices, update);
                 flag = UpdateInfo(vertices, update);
             }while(flag);
             iter--;
@@ -85,25 +85,32 @@ class GraphAlgorithm
         /* algorithm with missing condition
         missGroup is the group number, and there are 6 groups.
         loss is the iterate time when info is to lose */
-        void Algorithm_M(int missGroup, int loss){
+        void Algorithm_M(int missGroup, int loss, int option){
             int i;
             bool flag = false;      // judge finish condition
             // if the status doesn't change anymore, then it is finished.
             do{
                 iter ++;
-                // cout << "iter: " << iter << endl;
+                cout << "iter: " << iter << endl;
                 // missing info
                 if(iter == loss){
                     for(i=0; i<vertices.size(); i++){
                         if(vertices[i].groupNum_ == missGroup){
-                            vertices[i].result = MAXRESULT;
+                            if(option == 1)
+                            {
+                                vertices[i].result = MAXRESULT; // distance
+                            }
+                            else
+                            {
+                                vertices[i].result = i; //connected
+                            }
                             vertices[i].parent = -1;
                         }
                     }
                 }
 
                 flag = false;
-                memset(update, -1, sizeof(update));
+                memset(update, 0, sizeof(update));
                 for(i=0; i<vertices.size(); i++){
                     Relax(i);
                 }
@@ -115,7 +122,7 @@ class GraphAlgorithm
         /* auxiliary functions */
         virtual void Init(string filename){}
         virtual void Relax(int index){}
-        virtual bool UpdateInfo(vector <struct Vertex> &vertices, int update[][2]){
+        virtual bool UpdateInfo(vector <struct Vertex> &vertices, long update[][3]){
             bool flag = false;
             return flag;
         }
